@@ -9,7 +9,6 @@ from pyk4a import Config, PyK4A
 k4a = PyK4A(
 Config(
     color_resolution=pyk4a.ColorResolution.OFF,
-    # depth_mode=pyk4a.DepthMode.WFOV_UNBINNED,
     depth_mode=pyk4a.DepthMode.WFOV_2X2BINNED,
     synchronized_images_only=False,
     camera_fps=pyk4a.FPS.FPS_15,
@@ -18,7 +17,6 @@ Config(
 k4a2 = PyK4A(
 Config(
     color_resolution=pyk4a.ColorResolution.OFF,
-    # depth_mode=pyk4a.DepthMode.WFOV_UNBINNED,
     depth_mode=pyk4a.DepthMode.WFOV_2X2BINNED,
     synchronized_images_only=False,
     camera_fps=pyk4a.FPS.FPS_15,
@@ -30,10 +28,11 @@ k4a2._device_id = 1
 def determine_cams(camera1, camera2):
     camera1.start()
     camera2.start()
-    # Check if camera is sync master
+    # Check for master/client relation for sync
     if camera1.sync_jack_status[1] == True and camera2.sync_jack_status[0] == True:
         camera1.stop()
         camera2.stop()
+        camera2
         return camera1, camera2
     elif camera1.sync_jack_status[0] == True and camera2.sync_jack_status[1] == True:
         camera1.stop()
@@ -47,8 +46,12 @@ def determine_cams(camera1, camera2):
         return None, None
         
 Left, Right = determine_cams(k4a, k4a2)
-Left._device_id = 0
-Right._device_id = 1
+Left.wired_sync_mode=pyk4a.WiredSyncMode.MASTER
+Left._config.wired_sync_mode =pyk4a.WiredSyncMode.MASTER
+Right.wired_sync_mode=pyk4a.WiredSyncMode.SUBORDINATE
+Right._config.wired_sync_mode =pyk4a.WiredSyncMode.SUBORDINATE
+Left.subordinate_delay_off_master_usec=160
+Right.subordinate_delay_off_master_usec=160
 
 def cams_start():
     Left.start()
