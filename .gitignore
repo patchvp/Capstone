@@ -1,2 +1,5 @@
 *.swp
 *__
+/examples/ImageCapture/
+0*
+examples/.test2.py.swo
