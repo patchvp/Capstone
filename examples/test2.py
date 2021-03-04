@@ -79,8 +79,8 @@ def main():
             Image.fromarray(RightImage).save(f"ImageCapture/{i}Right.jpeg")
             Image.fromarray(LeftImage).save(f"ImageCapture/{i}Left.jpeg")
             Image.fromarray(RightImage).save(f"ImageCapture/{i}Right.jpeg")
-            np.savetxt(f"ImageCapture/{i}Left.txt", capture.depth, fmt="%s")
-            np.savetxt(f"ImageCapture/{i}Right.txt", capture2.depth, fmt="%s")
+            np.savetxt(f"ImageCapture/{i}Left.csv", np.asarray(capture.depth), delimiter=',')
+            np.savetxt(f"ImageCapture/{i}Right.csv", np.asarray(capture2.depth), delimiter=',')
             print(i)
             i+=1
             key = cv2.waitKey(10)
