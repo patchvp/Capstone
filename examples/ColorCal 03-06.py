@@ -15,7 +15,6 @@ def determine_cams(camera1, camera2):
     if camera1.sync_jack_status[1] == True and camera2.sync_jack_status[0] == True:
         camera1.stop()
         camera2.stop()
-        camera2
         return camera1, camera2
     elif camera1.sync_jack_status[0] == True and camera2.sync_jack_status[1] == True:
         camera1.stop()
@@ -34,28 +33,50 @@ def main():
     Config(
         color_resolution=pyk4a.ColorResolution.OFF,
         depth_mode=pyk4a.DepthMode.WFOV_2X2BINNED,
+        #color_resolution=pyk4a.ColorResolution.RES_720P,
+        #depth_mode=pyk4a.DepthMode.OFF,
         synchronized_images_only=False,
-        camera_fps=pyk4a.FPS.FPS_15,
+        camera_fps=pyk4a.FPS.FPS_5,
     )
     )
     k4a2 = PyK4A(
     Config(
         color_resolution=pyk4a.ColorResolution.OFF,
         depth_mode=pyk4a.DepthMode.WFOV_2X2BINNED,
+        #color_resolution=pyk4a.ColorResolution.RES_720P,
+        #depth_mode=pyk4a.DepthMode.OFF,
         synchronized_images_only=False,
-        camera_fps=pyk4a.FPS.FPS_15,
+        camera_fps=pyk4a.FPS.FPS_5,
     )
     )
     k4a2._device_id = 1
-
+    print("Determining Which camera is where now")
     Left, Right = determine_cams(k4a, k4a2)
-    Left.wired_sync_mode = pyk4a.WiredSyncMode.MASTER
-    Right.wired_sync_mode = pyk4a.WiredSyncMode.SUBORDINATE
-    Left.subordinate_delay_off_master_usec = 160
-    Right.subordinate_delay_off_master_usec = 160
+    print("\tcamera's have been determined")
+
+
+    Left._config.depth_mode = pyk4a.DepthMode.OFF
+    Right._config.depth_mode = pyk4a.DepthMode.OFF
+    Left._config.color_resolution = pyk4a.ColorResolution.RES_720P
+    Right._config.color_resolution = pyk4a.ColorResolution.RES_720P
+    #Left._config.color_format = pyk4a.ImageFormat.COLOR_NV12
+    #Right._config.color_format = pyk4a.ImageFormat.COLOR_NV12
+
+    #Left._config.wired_sync_mode = pyk4a.WiredSyncMode.MASTER
+    #Right._config.wired_sync_mode = pyk4a.WiredSyncMode.SUBORDINATE
+    #Left._config.wired_sync_modesubordinate_delay_off_master_usec = 160
+    #Right._config.wired_sync_modesubordinate_delay_off_master_usec = 160
+    
+    sleep(1)
+
+    Left.start()
+    print("Left Cam Started")
 
     Right.start()
-    Left.start()
+    print("Right Cam Started") 
+
+
+
     # getters and setters directly get and set on device
     Left.whitebalance = 4500
     assert Left.whitebalance == 4500
@@ -67,21 +88,22 @@ def main():
     assert Right.whitebalance == 4510
     i = 0
     while True:
-        sleep(50/1000)
+        #sleep(50/1000)
+        print("Just in the While Loop")
         capture = Left.get_capture()
         capture2 = Right.get_capture()
-        if np.any(capture.depth) and np.any(capture2.depth):
-            LeftImage = colorize(capture.depth, (None, 5000), cv2.COLORMAP_HSV)
-            RightImage = colorize(capture2.depth, (None, 5000), cv2.COLORMAP_HSV)
+        print("\tHave both Captures")
+        if np.any(capture.color) and np.any(capture2.color):
+            print("\t\tBoth Captures Detected")
+            LeftImage = capture.color
+            RightImage = capture2.color
             cv2.imshow("Left", LeftImage)
             cv2.imshow("Right", RightImage)
-            Image.fromarray(LeftImage).save(f"ImageCapture/{i}Left.jpeg")
-            Image.fromarray(RightImage).save(f"ImageCapture/{i}Right.jpeg")
-            Image.fromarray(LeftImage).save(f"ImageCapture/{i}Left.jpeg")
-            Image.fromarray(RightImage).save(f"ImageCapture/{i}Right.jpeg")
-            np.savetxt(f"ImageCapture/{i}Left.csv", np.asarray(capture.depth), delimiter=',')
-            np.savetxt(f"ImageCapture/{i}Right.csv", np.asarray(capture2.depth), delimiter=',')
-            #print(i)
+            #Image.fromarray(LeftImage).save(f"ImageCapture/Cali{i}Left.jpeg")
+            #Image.fromarray(RightImage).save(f"ImageCapture/Cali{i}Right.jpeg")
+            #np.savetxt(f"ImageCapture/{i}Left.csv", np.asarray(capture.depth), delimiter=',')
+            #np.savetxt(f"ImageCapture/{i}Right.csv", np.asarray(capture2.depth), delimiter=',')
+            print(i)
             i+=1
             key = cv2.waitKey(10)
             if key != -1:

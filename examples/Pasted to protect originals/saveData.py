@@ -81,7 +81,7 @@ def main():
             Image.fromarray(RightImage).save(f"ImageCapture/{i}Right.jpeg")
             np.savetxt(f"ImageCapture/{i}Left.csv", np.asarray(capture.depth), delimiter=',')
             np.savetxt(f"ImageCapture/{i}Right.csv", np.asarray(capture2.depth), delimiter=',')
-            #print(i)
+            print(i)
             i+=1
             key = cv2.waitKey(10)
             if key != -1:
